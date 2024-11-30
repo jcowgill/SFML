@@ -104,8 +104,12 @@ std::shared_ptr<_XIM> openXim()
         XSetLocaleModifiers("");
 
         // Create the input context
-        sharedXIM.reset(XOpenIM(UnixDisplayImpl::weakSharedDisplay.lock().get(), nullptr, nullptr, nullptr), XCloseIM);
-        xim = sharedXIM;
+        XIM newXIM = XOpenIM(UnixDisplayImpl::weakSharedDisplay.lock().get(), nullptr, nullptr, nullptr);
+        if (newXIM)
+        {
+            sharedXIM.reset(newXIM, XCloseIM);
+            xim = sharedXIM;
+        }
 
         // Restore the previous locale
         if (!prevLoc.empty())
